@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1">
+    <title>Device Offline</title>
+    <style type="text/css">
+        :root {
+            /* Light Theme */
+            --bg-base: #f0f2f5;
+            --bg-gradient: linear-gradient(135deg, #f0f2f5 0%, #e0e5ec 100%);
+            --text-primary: #1c1c1e;
+            --text-secondary: #6e6e73;
+            --card-bg: rgba(255, 255, 255, 0.65);
+            --card-border: rgba(255, 255, 255, 0.8);
+            --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            --btn-bg: #1c1c1e;
+            --btn-text: #ffffff;
+            --btn-hover: #3a3a3c;
+            --mesh-color: 28, 28, 30; /* RGB for canvas */
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme */
+            --bg-base: #0f0f11;
+            --bg-gradient: linear-gradient(135deg, #0f0f11 0%, #1a1a1f 100%);
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1a6;
+            --card-bg: rgba(30, 30, 34, 0.65);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            --btn-bg: #ffffff;
+            --btn-text: #1c1c1e;
+            --btn-hover: #e5e5ea;
+            --mesh-color: 255, 255, 255; /* RGB for canvas */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-base);
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+
+        /* 3D Canvas Background */
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: auto; /* Allow mouse interaction for 3D effect */
+        }
+
+        /* UI Container */
+        .ui-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            pointer-events: none; /* Let clicks pass through to canvas except for the card */
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 32px;
+            padding: 50px 40px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            max-width: 420px;
+            width: 100%;
+            pointer-events: auto;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        @keyframes slideUpFade {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Animated SVG Logo */
+        #logo {
+            margin-bottom: 24px;
+            display: inline-block;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        #logo svg {
+            width: 80px;
+            height: 80px;
+            stroke: var(--text-primary);
+            transition: stroke 0.5s ease;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            transition: color 0.5s ease;
+        }
+
+        /* Beautiful Button */
+        button {
+            appearance: none;
+            border: none;
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            font-size: 16px;
+            font-weight: 600;
+            padding: 16px 40px;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            background: var(--btn-hover);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 3D Background Canvas -->
+    <canvas id="canvas-container"></canvas>
+
+    <!-- UI Overlay -->
+    <div class="ui-container">
+        <div class="glass-card">
+            <div id="logo">
+                <!-- Modern, sleek offline SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 2L22 22" stroke-width="2"/>
+                    <path d="M8.5 16.5C10.433 14.567 13.567 14.567 15.5 16.5" opacity="0.4"/>
+                    <path d="M5 13C8.866 9.134 15.134 9.134 19 13" opacity="0.4"/>
+                    <path d="M2 8.5C7.52285 2.97715 16.4772 2.97715 22 8.5" opacity="0.4"/>
+                </svg>
+            </div>
+            
+            <span id="message">
+                <h1 id="titleText">Device Offline</h1>
+                <p id="descText">No internet connection.<br/>Check your connection and try again.</p>
+            </span>
+            
+            <button id="retryButton" type="button" onclick="handleRetry()">Retry Connection</button>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================
+           1. App Logic & Localization
+           ========================================= */
+        const titleText = document.getElementById('titleText');
+        const descText = document.getElementById('descText');
+        const retryButton = document.getElementById('retryButton');
+
+        // Localization
+        if (['ko', 'ko-kr', 'ko-kp'].indexOf(navigator.language.toLowerCase()) > -1) {
+            titleText.innerText = '오프라인 상태';
+            descText.innerHTML = '인터넷 연결이 끊겼습니다.<br/>연결을 확인하고 다시 시도해 주세요.';
+            retryButton.innerText = '다시 시도';
+        }
+
+        // Retry action
+        function handleRetry() {
+            retryButton.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                retryButton.style.transform = 'scale(1)';
+                if (typeof gonative !== 'undefined' && gonative.webview && gonative.webview.reload) {
+                    gonative.webview.reload();
+                } else {
+                    window.location.reload();
+                }
+            }, 150);
+        }
+
+        /* =========================================
+           2. Theme Management
+           ========================================= */
+        let currentRGB = '28, 28, 30'; // Default light theme particle color
+
+        function updateDarkMode() {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (isDark) {
+                document.documentElement.setAttribute("data-theme", "dark");
+                currentRGB = '255, 255, 255';
+            } else {
+                document.documentElement.setAttribute("data-theme", "light");
+                currentRGB = '28, 28, 30';
+            }
+        }
+        
+        updateDarkMode();
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateDarkMode);
+        }
+
+        /* =========================================
+           3. Vanilla 3D Canvas Engine (Zero Dependencies)
+           ========================================= */
+        const canvas = document.getElementById('canvas-container');
+        const ctx = canvas.getContext('2d', { alpha: false });
+        let width, height;
+        let points = [];
+        const numPoints = 120;
+        let angleX = 0;
+        let angleY = 0;
+        let targetAngleX = 0;
+        let targetAngleY = 0;
+        
+        // Sphere parameters
+        let radius = 250;
+        const focalLength = 400;
+
+        // Resize handler
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            radius = Math.min(width, height) * 0.35; // Responsive sphere size
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Generate 3D points on a sphere (Fibonacci lattice for even distribution)
+        function init3DPoints() {
+            points = [];
+            const phi = Math.PI * (3 - Math.sqrt(5));
+            for (let i = 0; i < numPoints; i++) {
+                const y = 1 - (i / (numPoints - 1)) * 2; 
+                const radiusAtY = Math.sqrt(1 - y * y);
+                const theta = phi * i;
+
+                const x = Math.cos(theta) * radiusAtY;
+                const z = Math.sin(theta) * radiusAtY;
+
+                points.push({
+                    origX: x, origY: y, origZ: z, // normalized
+                    x: 0, y: 0, z: 0 // projected
+                });
+            }
+        }
+        init3DPoints();
+
+        // Mouse/Touch Interaction for 3D rotation
+        function handleMove(clientX, clientY) {
+            const normalizedX = (clientX / width) - 0.5;
+            const normalizedY = (clientY / height) - 0.5;
+            targetAngleY = normalizedX * 2; // Left/right rotation
+            targetAngleX = normalizedY * 2; // Up/down rotation
+        }
+
+        window.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
+        window.addEventListener('touchmove', (e) => handleMove(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+
+        // 3D Math & Render Loop
+        function render3D() {
+            // Clear canvas with theme background
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            ctx.fillStyle = isDark ? '#0f0f11' : '#f0f2f5';
+            ctx.fillRect(0, 0, width, height);
+
+            // Smooth interpolation for mouse movement + slow constant rotation
+            angleX += (targetAngleX - angleX) * 0.05;
+            angleY += (targetAngleY - angleY) * 0.05;
+            angleY += 0.002; // Constant slow spin
+
+            const sinX = Math.sin(angleX);
+            const cosX = Math.cos(angleX);
+            const sinY = Math.sin(angleY);
+            const cosY = Math.cos(angleY);
+
+            const projectedPoints = [];
+
+            // 1. Rotate & Project Points
+            for (let i = 0; i < points.length; i++) {
+                let p = points[i];
+                
+                // Scale original coordinates by radius
+                let x = p.origX * radius;
+                let y = p.origY * radius;
+                let z = p.origZ * radius;
+
+                // Rotation X
+                let xy = cosX * y - sinX * z;
+                let xz = sinX * y + cosX * z;
+                
+                // Rotation Y
+                let yz = cosY * xz - sinY * x;
+                let yx = sinY * xz + cosY * x;
+
+                // Apply Perspective
+                let scale = focalLength / (focalLength + yz);
+                let x2d = (yx * scale) + (width / 2);
+                let y2d = (xy * scale) + (height / 2);
+
+                projectedPoints.push({
+                    x2d: x2d,
+                    y2d: y2d,
+                    z: yz,
+                    scale: scale
+                });
+            }
+
+            // Sort points by Z index to draw back-to-front (simple depth sorting)
+            projectedPoints.sort((a, b) => b.z - a.z);
+
+            // 2. Draw Connections (The "Broken Mesh" effect)
+            ctx.lineWidth = 1;
+            for (let i = 0; i < projectedPoints.length; i++) {
+                const p1 = projectedPoints[i];
+                // Only draw if point is somewhat in front
+                if (p1.z < 150) {
+                    for (let j = i + 1; j < projectedPoints.length; j++) {
+                        const p2 = projectedPoints[j];
+                        
+                        // Calculate 2D distance
+                        const dx = p1.x2d - p2.x2d;
+                        const dy = p1.y2d - p2.y2d;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        // If close enough, draw a connecting line
+                        if (dist < 60 * p1.scale) {
+                            // Opacity based on distance and depth (z)
+                            const alpha = (1 - (dist / (60 * p1.scale))) * (1 - (p1.z + radius) / (radius * 2)) * 0.4;
+                            ctx.strokeStyle = `rgba(${currentRGB}, ${alpha})`;
+                            ctx.beginPath();
+                            ctx.moveTo(p1.x2d, p1.y2d);
+                            ctx.lineTo(p2.x2d, p2.y2d);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            // 3. Draw Points
+            for (let i = 0; i < projectedPoints.length; i++) {
+                const p = projectedPoints[i];
+                // Calculate opacity and size based on depth
+                const depthAlpha = 1 - (p.z + radius) / (radius * 2); 
+                const alpha = Math.max(0.1, depthAlpha);
+                const size = Math.max(0.5, 2.5 * p.scale);
+
+                ctx.fillStyle = `rgba(${currentRGB}, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(p.x2d, p.y2d, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            requestAnimationFrame(render3D);
+        }
+
+        // Start animation loop
+        render3D();
+    </script>
+</body>
+</html>

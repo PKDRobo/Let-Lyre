@@ -1,0 +1,112 @@
+{
+  "name": "Let Lyre - Music Streaming",
+  "short_name": "Let Lyre",
+  "description": "Stream, Discover, Feel the music with Let Lyre",
+  "start_url": "/index.php",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "fullscreen", "minimal-ui"],
+  "background_color": "#0a0a0a",
+  "theme_color": "#00ff88",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["music", "entertainment", "social"],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Search Music",
+      "short_name": "Search",
+      "description": "Search for songs, albums, artists",
+      "url": "/index.php#search",
+      "icons": [
+        {
+          "src": "https://iili.io/fzn2aRf.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Library",
+      "short_name": "Library",
+      "description": "Your liked songs and playlists",
+      "url": "/index.php#library",
+      "icons": [
+        {
+          "src": "https://iili.io/fzn2aRf.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "icons": [
+    {
+      "src": "https://iili.io/fzn2aRf.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "https://iili.io/fzn2aRf.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "https://iili.io/fzn2aRf.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "https://iili.io/fzn2aRf.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "https://iili.io/fzn2aRf.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://iili.io/fzn2aRf.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "https://iili.io/fzn2aRf.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "https://iili.io/fzn2aRf.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "https://iili.io/fzn2aRf.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://iili.io/fzn2aRf.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://iili.io/fzn2aRf.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  }
+}
